@@ -78,6 +78,24 @@ export default function AdminLayout({ children }) {
 
   if (loading || !client) return <div className="min-h-screen flex items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-blue-500" /></div>;
 
+  // SECURITY: While license is still being checked, show a loading spinner — do NOT render children
+  if (licenseLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-blue-500 mx-auto mb-3" />
+          <p className="text-sm text-gray-400">Verifying license…</p>
+        </div>
+      </div>
+    );
+  }
+
+  // SECURITY: If blocked, show ONLY the overlay — do NOT render children at all.
+  // This prevents any admin page from fetching data or rendering content.
+  if (isBlocked) {
+    return <LicenseBlockOverlay contactPhone={contactPhone} />;
+  }
+
   const isActive = (href, exact) => exact ? pathname === href : pathname.startsWith(href);
 
   return (
@@ -132,7 +150,6 @@ export default function AdminLayout({ children }) {
         <main className="flex-1 p-4 lg:p-6 overflow-auto">{children}</main>
       </div>
       <ToastContainer toasts={toasts} onRemove={removeToast} />
-      {isBlocked && <LicenseBlockOverlay contactPhone={contactPhone} />}
     </div>
   );
 }
