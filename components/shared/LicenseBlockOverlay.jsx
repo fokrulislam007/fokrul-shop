@@ -15,19 +15,19 @@ export default function LicenseBlockOverlay({ contactPhone }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+        backgroundColor: 'rgb(255 255 255 / 85%)',
         backdropFilter: 'blur(8px)',
       }}
     >
       <div
         style={{
-          background: 'linear-gradient(145deg, #1a1a2e, #16213e)',
+          background: 'linear-gradient(145deg, rgb(255 255 255), rgb(255 255 255))',
           borderRadius: '24px',
           padding: '48px',
           textAlign: 'center',
           maxWidth: '420px',
           width: '90%',
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+          boxShadow: 'rgb(243 233 233 / 50%) 0px 25px 60px, rgba(255, 255, 255, 0.05) 0px 0px 0px 1px',
         }}
       >
         {/* Logo / Brand Mark */}
@@ -41,7 +41,6 @@ export default function LicenseBlockOverlay({ contactPhone }) {
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 24px auto',
-            boxShadow: '0 8px 32px rgba(99, 102, 241, 0.3)',
           }}
         >
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -54,20 +53,20 @@ export default function LicenseBlockOverlay({ contactPhone }) {
           style={{
             fontSize: '28px',
             fontWeight: 900,
-            color: '#ffffff',
+            color: 'rgb(0 0 0)',
             letterSpacing: '-0.02em',
             marginBottom: '12px',
             lineHeight: 1.2,
           }}
         >
-          Construct with MOREX
+          Please contact with our support team
         </h1>
 
         {/* Subtitle */}
         <p
           style={{
             fontSize: '14px',
-            color: 'rgba(255, 255, 255, 0.5)',
+            color: 'rgb(127 125 125 / 86%)',
             marginBottom: '32px',
             lineHeight: 1.6,
           }}
