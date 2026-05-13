@@ -17,7 +17,8 @@ const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
  *   contactPhone: phone number from license doc
  */
 export function useLicenseCheck() {
-  const [isBlocked, setIsBlocked] = useState(false);
+  // SECURITY: Start blocked until proven otherwise (fail-closed)
+  const [isBlocked, setIsBlocked] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [contactPhone, setContactPhone] = useState('');
 
@@ -42,11 +43,29 @@ export function useLicenseCheck() {
       }
 
       // Fresh check from own Firestore
-      const snap = await getDoc(doc(db, '_ggly_license', 'status'));
+      let snap;
+      try {
+        snap = await getDoc(doc(db, '_ggly_license', 'status'));
+      } catch (fetchErr) {
+        console.error('[Ggly License] Firestore fetch failed:', fetchErr);
+        // SECURITY: If we can't reach Firestore, stay blocked
+        setIsBlocked(true);
+        setContactPhone('');
+        setIsLoading(false);
+        return;
+      }
 
       if (!snap.exists()) {
         // No license doc = not managed by Ggly Master, allow access
         setIsBlocked(false);
+        // Cache the unblocked result
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(CACHE_KEY, JSON.stringify({
+            isBlocked: false,
+            contactPhone: '',
+            checkedAt: Date.now(),
+          }));
+        }
         setIsLoading(false);
         return;
       }
@@ -69,29 +88,22 @@ export function useLicenseCheck() {
 
       // Cache the result
       if (typeof window !== 'undefined') {
-        localStorage.setItem(CACHE_KEY, JSON.stringify({
-          isBlocked: blocked,
-          contactPhone: phone,
-          checkedAt: Date.now(),
-        }));
+        if (blocked) {
+          // When blocked, clear cache so next load also checks fresh
+          localStorage.removeItem(CACHE_KEY);
+        } else {
+          localStorage.setItem(CACHE_KEY, JSON.stringify({
+            isBlocked: false,
+            contactPhone: phone,
+            checkedAt: Date.now(),
+          }));
+        }
       }
     } catch (err) {
       console.error('[Ggly License] Check failed:', err);
-      // On error, try to use cached data or allow access
-      if (typeof window !== 'undefined') {
-        const cached = localStorage.getItem(CACHE_KEY);
-        if (cached) {
-          try {
-            const data = JSON.parse(cached);
-            setIsBlocked(data.isBlocked);
-            setContactPhone(data.contactPhone || '');
-          } catch {
-            setIsBlocked(false);
-          }
-        } else {
-          setIsBlocked(false);
-        }
-      }
+      // SECURITY: On error, stay blocked (fail-closed)
+      setIsBlocked(true);
+      setContactPhone('');
     } finally {
       setIsLoading(false);
     }
